@@ -1,4 +1,17 @@
 ---
+- name: Install Common packages
+  apt: pkg={{ item }} state=latest update_cache=true
+  with_items:
+    - ntp
+    - wget
+    - curl
+    - git
+    - unzip
+    - htop
+  notify:
+    - Start NTP
+  tags: unattended-upgrade
+
 - name: Install Unattended Upgrade
   apt: name=unattended-upgrades state=latest update_cache=true
   register: uuinstall
@@ -7,9 +20,11 @@
 - name: Add Periodic Configuration
   copy: src=10periodic dest=/etc/apt/apt.conf.d/10periodic owner=root group=root
   when: uuinstall|succeeded
+  tags: unattended-upgrade
 
 - name: Configure Unattended Upgrade
   copy: src=50unattended-upgrades dest=/etc/apt/apt.conf.d/50unattended-upgrades owner=root group=root
   when: uuinstall|succeeded
   notify:
    - Restart Unattended Upgrade
+  tags: unattended-upgrade
