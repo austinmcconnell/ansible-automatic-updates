@@ -1,0 +1,15 @@
+---
+- name: Install Unattended Upgrade
+  apt: name=unattended-upgrades state=latest update_cache=true
+  register: uuinstall
+  tags: unattended-upgrade
+
+- name: Add Periodic Configuration
+  copy: src=10periodic dest=/etc/apt/apt.conf.d/10periodic owner=root group=root
+  when: uuinstall|succeeded
+
+- name: Configure Unattended Upgrade
+  copy: src=50unattended-upgrades dest=/etc/apt/apt.conf.d/50unattended-upgrades owner=root group=root
+  when: uuinstall|succeeded
+  notify:
+   - Restart Unattended Upgrade
